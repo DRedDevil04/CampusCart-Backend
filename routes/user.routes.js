@@ -1,9 +1,10 @@
 const express = require('express');
-const {updateProfile, getProfile} = require('../controllers/userControllers');
-const isAuthorized = require("../middlewares/isAuthorised.middleware");
+const {updateProfile, getProfile, updateUserRole} = require('../controllers/userControllers');
+const {isAuthorized, isAdmin} = require("../middlewares/isAuthorised.middleware");
 const router = express.Router();
 
 router.put("/updateProfile", isAuthorized, updateProfile);
 router.post("/getProfile", isAuthorized, getProfile);
+router.put("/updaterole",isAuthorized, isAdmin, updateUserRole);
 
 module.exports = router;

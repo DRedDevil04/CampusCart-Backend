@@ -23,8 +23,21 @@ async function isAuthorized(req, res, next) {
         req.body.user = user;
         next();
     } catch (err) {
-        return response_500(res, "Failed to authenticate User", err);
+        return response_500(res, "Failed to authenticate user", err);
     }
 }
 
-module.exports = isAuthorized;
+function isAdmin(req, res, next) {
+    const user = req.body.user;
+
+    if (user.role !== 'admin') {
+        return response_400(res, "Access denied. Admins only.");
+    }
+
+    next();
+}
+
+module.exports = {
+    isAuthorized,
+    isAdmin
+};

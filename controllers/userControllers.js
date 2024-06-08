@@ -1,5 +1,7 @@
 const User = require('../models/user.models');
 const {response_400, response_200} = require('../utils/responseCodes.utils')
+const bcrypt = require("bcrypt");
+const {generateToken} = require("./authControllers")
 
 exports.updateProfile = async (req, res) => {
     
@@ -19,13 +21,20 @@ exports.updateProfile = async (req, res) => {
 
         if(name) updateobj.name = name;
         if(profilePicture) updateobj.profilePicture = profilePicture;
-        if(password) updateobj.password = password;
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = bcrypt.hashSync(password, salt);
+            updateobj.password = hashedPassword;
+        }
           
         const updatedUser = await User.findByIdAndUpdate(userExists._id, updateobj, { new: true });
-        return response_200(res, "data updated", {
+        const newToken = await generateToken(res, updatedUser);
+
+        return response_200(res, "Data updated", {
             name: updatedUser.name,
             email: updatedUser.email,
             profilePicture: updatedUser.profilePicture,
+            token: newToken,
         });
 
     }
@@ -52,6 +61,7 @@ exports.getProfile = async (req, res) => {
             name: userExists.name,
             email: userExists.email,
             profilePicture: userExists.profilePicture,
+            role: userExists.role,
         });
 
     }
@@ -59,3 +69,30 @@ exports.getProfile = async (req, res) => {
         return response_400(res, err);
     }
 }
+
+
+exports.updateUserRole = async (req, res) => {
+    try {
+        const { email, newrole } = req.body;
+
+        if (!email || !newrole) {
+            return response_400(res, "Email and new role are required");
+        }
+
+        const userExists = await User.findOne({ email: email }).exec();
+        if (!userExists) {
+            return response_400(res, "User not found");
+        }
+
+        userExists.role = newrole;
+
+        await userExists.save();
+
+        return response_200(res, "User role updated successfully", {
+            email: userExists.email,
+            newRole: userExists.role,
+        });
+    } catch (err) {
+        return response_500(res, "Failed to update user role", err);
+    }
+};

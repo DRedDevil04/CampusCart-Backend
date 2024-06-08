@@ -1,38 +1,48 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const dotenv = require("dotenv");
+const express = require("express");
+const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const dotenv  = require ("dotenv");
+const {ConnectMongoDB} = require("./connection");
+
+//Routers
+const ItemRouter = require("./routes/item");
+const CategoryRouter = require("./routes/category");
+const authRoutes = require('./routes/auth.routes');
+const userRoutes = require('./routes/user.routes');
+
+
 const app = express();
 dotenv.config();
-const PORT = process.env.PORT || 8000;
-const URL = process.env.BASE_URL;
 
-mongoose.connect(URL)
-    .then(() => console.log('Connected to Database!'))
-    .catch((err) => console.log("failed to connect to database ", err));
-
+//Middlewares
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(cors({
-    origin: 'http://localhost:5173',
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type'],
-    credentials: true
+  origin: 'http://localhost:5173',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+  credentials: true
 }));
 app.use(cookieParser());
 
+//Server Listen
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, ()=>console.log("Server running at Port:",PORT));
 
-app.get('/', (req, res)=>{
-    res.send("server is running");
-})
+//MongoDB connection
+ConnectMongoDB(process.env.MONGO_URL)
+    .then(()=> console.log("MongoDB connected successfully."))
+    .catch((err)=>console.log(err));
 
-const authRoutes = require('./routes/auth.routes');
+//Test Api
+app.get("/",(req,res)=>{
+    return res.send("Server is Running");
+  })
+
+//Handling Items and Categories
+app.use("/item", ItemRouter);
+app.use("/category", CategoryRouter);
+
+//Handling User
 app.use('/auth', authRoutes);
-
-const userRoutes = require('./routes/user.routes');
 app.use('/user', userRoutes);
-
-app.listen(PORT, ()=>{
-    console.log("listening on port", PORT , "...");
-})
