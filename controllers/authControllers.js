@@ -22,7 +22,7 @@ function validate(name, email, password, res){
     return true;
 }
 
-async function generateToken(res, user){
+exports.generateToken = async function(res, user){
     try{
         const token = jwt.sign({ _id: user._id }, process.env.JWT_KEY, {
                 expiresIn: "7d",
@@ -40,66 +40,70 @@ async function generateToken(res, user){
 }
 
 exports.signup = async (req, res) => {
-    
-    try{
-        const {name, email, password, profilePicture} = req.body;
+    try {
+        const { name, email, password, profilePicture } = req.body;
 
-        if(validate(name, email, password, res)){
+        if (validate(name, email, password, res)) {
             const emailExists = await User.findOne({ email: email }).exec();
             if (emailExists) {
                 return response_400(res, "email is already in use");
             }
+
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = bcrypt.hashSync(password, salt);
+
             let new_user = new User({
                 name: name,
                 email: email,
                 password: hashedPassword,
                 profilePicture: profilePicture || "",
-            });        
+                role: "user"
+            });
 
             const savedUser = await new_user.save();
-            const token = await generateToken(res, savedUser);
+            const token = await exports.generateToken(res, savedUser);
 
             return response_200(res, "registered successfully!", {
                 name: savedUser.name,
                 email: savedUser.email,
+                role: savedUser.role,
                 token: token
             });
         }
-
-    }
-    catch(err){
+    } catch (err) {
         return response_400(res, err);
     }
-}
-exports.login = async (req, res) => {
-    try{
-        const {email, password} = req.body;
+};
 
-        if(validate("something", email, password, res)){
-            const userExists = await User.findOne({ email: email}).exec();
+exports.login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (validate("something", email, password, res)) {
+            const userExists = await User.findOne({ email: email }).exec();
             
             if (userExists) {
                 const checkPassword = await bcrypt.compare(password, userExists.password);
-                if(checkPassword){
-                    const token = await generateToken(res, userExists);
+                if (checkPassword) {
+                    const token = await exports.generateToken(res, userExists);
                     return response_200(res, "logged in successfully!", {
                         name: userExists.name,
                         email: userExists.email,
+                        role: userExists.role,
                         token: token
                     });
+                } else {
+                    return response_400(res, "Wrong Password");
                 }
-                return response_400(res, "Wrong Password");
+            } else {
+                return response_400(res, "didn't find this email");
             }
-            return response_400(res, "didn't find this email");
         }
+    } catch (err) {
+        return response_400(res, err.message);
+    }
+};
 
-    }
-    catch(err){
-        return response_400(res, err);
-    }
-}
 exports.logout = async (req, res) => {
     try{
         const {email, password} = req.body;
