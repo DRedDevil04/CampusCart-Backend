@@ -6,11 +6,9 @@ const {generateToken} = require("./authControllers")
 exports.updateProfile = async (req, res) => {
     
     try{
-        const {name, email, password, profilePicture} = req.body;
+        const {name, profilePicture, address} = req.body;
 
-        if(!email){
-            return response_400(res, "I require user email");
-        }
+        const {email} = req.body.user;
 
         const userExists = await User.findOne({ email: email }).exec();
         if (!userExists) {
@@ -21,11 +19,7 @@ exports.updateProfile = async (req, res) => {
 
         if(name) updateobj.name = name;
         if(profilePicture) updateobj.profilePicture = profilePicture;
-        if (password) {
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = bcrypt.hashSync(password, salt);
-            updateobj.password = hashedPassword;
-        }
+        if(address) updateobj.address = address;
           
         const updatedUser = await User.findByIdAndUpdate(userExists._id, updateobj, { new: true });
         const newToken = await generateToken(res, updatedUser);
@@ -33,6 +27,7 @@ exports.updateProfile = async (req, res) => {
         return response_200(res, "Data updated", {
             name: updatedUser.name,
             email: updatedUser.email,
+            address: updatedUser.address,
             profilePicture: updatedUser.profilePicture,
             token: newToken,
         });
@@ -46,7 +41,7 @@ exports.updateProfile = async (req, res) => {
 exports.getProfile = async (req, res) => {
     
     try{
-        const {email} = req.body;
+        const {email} = req.body.user;
 
         if(!email){
             return response_400(res, "I require user email");
@@ -60,6 +55,7 @@ exports.getProfile = async (req, res) => {
         return response_200(res, "get Profile", {
             name: userExists.name,
             email: userExists.email,
+            address: userExists.address,
             profilePicture: userExists.profilePicture,
             role: userExists.role,
         });
@@ -73,7 +69,7 @@ exports.getProfile = async (req, res) => {
 
 exports.updateUserRole = async (req, res) => {
     try {
-        const { email, newrole } = req.body;
+        const { email, newrole } = req.body.user;
 
         if (!email || !newrole) {
             return response_400(res, "Email and new role are required");
