@@ -41,7 +41,7 @@ exports.generateToken = async function(res, user){
 
 exports.signup = async (req, res) => {
     try {
-        const { name, email, password, profilePicture } = req.body;
+        const { name, email, password, address, profilePicture } = req.body;
 
         if (validate(name, email, password, res)) {
             const emailExists = await User.findOne({ email: email }).exec();
@@ -57,6 +57,7 @@ exports.signup = async (req, res) => {
                 email: email,
                 password: hashedPassword,
                 profilePicture: profilePicture || "",
+                address: address || "",
                 role: "user"
             });
 
@@ -106,17 +107,13 @@ exports.login = async (req, res) => {
 
 exports.logout = async (req, res) => {
     try{
-        const {email, password} = req.body;
-
+        const {email, password} = req.body.user;
+        // console.log(email, password);
         if(validate("something", email, password, res)){
             const userExists = await User.findOne({ email: email}).exec();
             if (userExists) {
-                const checkPassword = bcrypt.compare(password, userExists.password);
-                if(checkPassword){
-                    res.clearCookie("token");
-                    return response_200(res, "logged out successfully!", {});
-                }
-                return response_400(res, "Wrong Password");
+                res.clearCookie("token");
+                return response_200(res, "logged out successfully!", {});
             }
             return response_400(res, "didn't find this email");
         }
