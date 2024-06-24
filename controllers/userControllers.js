@@ -92,3 +92,18 @@ exports.updateUserRole = async (req, res) => {
         return response_500(res, "Failed to update user role", err);
     }
 };
+
+exports.getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find({}, 'name email role');
+
+        if (!users || users.length === 0) {
+            return response_400(res, "No users found");
+        }
+
+        return response_200(res, "Users fetched successfully", users);
+    } 
+    catch (err) {
+        return response_500(res, "Failed to fetch users", err);
+    }
+};
