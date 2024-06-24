@@ -92,3 +92,15 @@ exports.updateUserRole = async (req, res) => {
         return response_500(res, "Failed to update user role", err);
     }
 };
+
+exports.getAllUsers = async (req, res) => {
+    
+    try{
+        // console.log(req.body);
+        const user = await User.find().select("-password -verified");
+        response_200(res, "all users", user);
+    }
+    catch(err){
+        return response_400(res, err);
+    }
+}
