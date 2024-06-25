@@ -23,18 +23,20 @@ function validate(name, email, password, res){
 }
 
 exports.generateToken = async function(res, user){
-    try{
+    try {
         const token = jwt.sign({ _id: user._id }, process.env.JWT_KEY, {
-                expiresIn: "7d",
+            expiresIn: "7d",
         });
+
         res.cookie("token", token, {
             httpOnly: true,
-            secure: true,
+            secure: true,   
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 
         });
+
         return token;
-    }
-    catch(err){
-        console.log(err);
+    } catch(err) {
+        console.error("Error generating token:", err);
         return "";
     }
 }
