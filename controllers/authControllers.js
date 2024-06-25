@@ -112,12 +112,11 @@ exports.logout = async (req, res) => {
         if (!token) {
             return response_400(res, "No token found");
         }
-        const decodedToken = jwt.verify(token, process.env.JWT_KEY);
-        res.clearCookie("token");
-        
+
+        res.clearCookie("token"); 
+
         return response_200(res, "Logged out successfully!", {});
-    } 
-    catch (err) {
+    } catch (err) {
         console.error("Logout error:", err);
         return response_400(res, err.message);
     }
