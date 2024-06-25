@@ -106,20 +106,19 @@ exports.login = async (req, res) => {
 };
 
 exports.logout = async (req, res) => {
-    try{
-        const {email, password} = req.body.user;
-        // console.log(email, password);
-        if(validate("something", email, password, res)){
-            const userExists = await User.findOne({ email: email}).exec();
-            if (userExists) {
-                res.clearCookie("token");
-                return response_200(res, "logged out successfully!", {});
-            }
-            return response_400(res, "didn't find this email");
-        }
+    try {
+        const token = req.cookies.token;
 
+        if (!token) {
+            return response_400(res, "No token found");
+        }
+        const decodedToken = jwt.verify(token, process.env.JWT_KEY);
+        res.clearCookie("token");
+        
+        return response_200(res, "Logged out successfully!", {});
+    } 
+    catch (err) {
+        console.error("Logout error:", err);
+        return response_400(res, err.message);
     }
-    catch(err){
-        return response_400(res, err);
-    }
-}
+};
