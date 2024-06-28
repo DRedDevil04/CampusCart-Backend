@@ -1,10 +1,11 @@
 const express = require('express');
 const Router = express.Router();
 const {isAuthorized, isAdmin} = require("../middlewares/isAuthorised.middleware");
-const {addNewOrder,editOrderStatus,editPaymentStatus,editShippingDetails,editShippingAddress,getAllOrders,getOrderDetails} = require("../controllers/order");
+const {addNewOrder,editOrderStatus,editPaymentStatus,editShippingDetails,editShippingAddress,getAllOrders,getOrderDetails,getParticularUserAllOrders} = require("../controllers/order");
 
 
 Router.get('/',isAuthorized,isAdmin,getAllOrders);
+Router.get('/user',isAuthorized,getParticularUserAllOrders);
 Router.get('/:id',isAuthorized,getOrderDetails);
 Router.post('/',isAuthorized,addNewOrder);
 Router.put('/address/:id',isAuthorized,editShippingAddress);

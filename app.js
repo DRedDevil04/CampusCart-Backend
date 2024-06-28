@@ -46,4 +46,6 @@ app.use("/category", CategoryRouter);
 //Handling User
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
+
+//Handling Orders
 app.use('/order', orderRoutes);

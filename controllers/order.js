@@ -197,6 +197,25 @@ const getAllOrders = async (req, res) => {
     }
 };
 
+const getParticularUserAllOrders = async (req,res)=>{
+    try {
+        const orders = await Order.find({customer:req.body.user._id})
+            .populate('items.item', 'name price');
+
+        if (!orders) {
+            return res.status(404).json({ message: "No Orders Found!" });
+        }
+        return res.status(200).json({
+            message:"User Order Details Fetched Successfully!",
+            orders
+        });
+    } catch (error) {
+        console.error("Error Getting Orders",error);
+        return res.status(500).json({message:"Server Error!"});
+    }
+}
+
+
 module.exports = {
     addNewOrder,
     editOrderStatus,
@@ -205,4 +224,5 @@ module.exports = {
     editShippingAddress,
     getOrderDetails,
     getAllOrders,
+    getParticularUserAllOrders
 };
