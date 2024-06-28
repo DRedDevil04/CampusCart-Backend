@@ -3,19 +3,25 @@ const Category = require("../models/category");
 const { z } = require("zod");
 
 const itemSchema = z.object({
-    name: z.string().min(1,"Name is required"),
-    description: z.string().min(1,"Description is required"),
-    categoryID: z.string().min(1,"CategoryID is required"),
+    name: z.string().min(1, { message: "Name is required" }),
+    description: z.string().min(1, { message: "Description is required" }),
+    categoryID: z.string().min(1, { message: "CategoryID is required" }),
     price: z.object({
-        amount: z.number().nonnegative("Amount must be a non-negative number"),
-        currency: z.string().optional()
+        amount: z.number().nonnegative({ message: "Amount must be a non-negative number" }),
+        currency: z.string().optional(),
+        discount: z.object({
+            amount: z.number().nonnegative({ message: "Discount amount must be a non-negative number" }),
+            start: z.date().nullable().optional(),
+            end: z.date().nullable().optional(),
+        }).nullable().optional(),
     }),
     images: z.array(z.object({
-        url: z.string().url("Invalid URL format"),
+        url: z.string().url({ message: "Invalid URL format" }),
         altText: z.string().optional()
     })).optional(),
-    available: z.boolean().optional()
+    available: z.boolean().optional(),
 });
+
 
 const GetAllItems = async (req, res) => {
     try {
@@ -70,18 +76,18 @@ const UpdateItem = async (req, res) => {
         if (!item) {
             return res.status(404).json({ message: 'Item to be updated not found!' });
         }
-
-        const validatedData = itemSchema.partial().parse(req.body);
-
-        const { name, description, categoryID, price, images, available } = validatedData;
-
+        console.log(req.body);
+        const { name, description, categoryID, price, images, available } = req.body;
+        
         if (name) item.name = name;
         if (description) item.description = description;
+        
         if (categoryID) {
             const category = await Category.findById(categoryID);
             if (!category) {
                 return res.status(404).json({ message: "Category to be added to item not found!" });
             }
+            
             const prevCategoryID = item.category;
             if (categoryID !== prevCategoryID) {
                 if (prevCategoryID) {
@@ -103,11 +109,23 @@ const UpdateItem = async (req, res) => {
             if (price.amount !== undefined) {
                 item.price.amount = price.amount;
             }
-            if(price.discount!==undefined) item.price.discount = price.discount; 
+            
+            if (price.discount !== undefined) {
+                const { amount, start, end } = price.discount;
+                item.price.discount.amount = amount === '' ? null : amount;
+                item.price.discount.start = start === '' ? null : start;
+                item.price.discount.end = end === '' ? null : end;
+            }
         }
-        if (images) item.images = images;
-        if (available !== null) item.available = available;
-
+        
+        if (images) {
+            item.images = images;
+        }
+        
+        if (available !== null) {
+            item.available = available;
+        }
+        
         await item.save();
         res.status(201).json(item);
     } catch (err) {
@@ -119,6 +137,7 @@ const UpdateItem = async (req, res) => {
         }
     }
 };
+
 
 const DeleteItem = async (req, res) => {
     try {
