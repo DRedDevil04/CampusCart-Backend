@@ -94,7 +94,7 @@ exports.updateUserRole = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
     try {
-        const users = await User.find({}, 'name email role orders');
+        const users = await User.find({}, 'name email role __created orders');
 
         if (!users || users.length === 0) {
             return response_400(res, "No users found");
