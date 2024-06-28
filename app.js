@@ -9,7 +9,7 @@ const ItemRouter = require("./routes/item");
 const CategoryRouter = require("./routes/category");
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
-
+const orderRoutes = require('./routes/order');
 
 const app = express();
 dotenv.config();
@@ -46,3 +46,4 @@ app.use("/category", CategoryRouter);
 //Handling User
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
+app.use('/order', orderRoutes);

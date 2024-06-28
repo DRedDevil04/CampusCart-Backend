@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { array } = require('zod');
 
 const userSchema = new mongoose.Schema({
     __created: {
@@ -29,9 +28,15 @@ const userSchema = new mongoose.Schema({
     profilePicture:{
         type: String,
     },
-    address:{
-        type: String,
+    address: {
+        room: { type: String, default: "" },
+        floor: { type: String, default: "" },
+        hostel: { type: String, default: "" },
+        contact_number: { type: String, default: "" },
     },
+    orders:[{
+        type:mongoose.Schema.Types.ObjectId, ref:"Order"
+    }],
     verified: {
         type: Boolean,
         default: false

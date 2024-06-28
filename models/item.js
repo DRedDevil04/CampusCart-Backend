@@ -17,7 +17,7 @@ const ItemSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId, ref:"Category"
     },
     price:{
-        currency:{type:String, default:"Rupee"},
+        currency:{type:String, default:"INR"},
         amount:{type:Number, required:true},
         discount:{
             amount:{type:Number, default:0},

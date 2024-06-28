@@ -23,25 +23,27 @@ function validate(name, email, password, res){
 }
 
 exports.generateToken = async function(res, user){
-    try{
+    try {
         const token = jwt.sign({ _id: user._id }, process.env.JWT_KEY, {
-                expiresIn: "7d",
+            expiresIn: "7d",
         });
+
         res.cookie("token", token, {
             httpOnly: true,
-            secure: true,
+            secure: true,   
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 
         });
+
         return token;
-    }
-    catch(err){
-        console.log(err);
+    } catch(err) {
+        console.error("Error generating token:", err);
         return "";
     }
 }
 
 exports.signup = async (req, res) => {
     try {
-        const { name, email, password, address, profilePicture } = req.body;
+        const { name, email, password,address, profilePicture } = req.body;
 
         if (validate(name, email, password, res)) {
             const emailExists = await User.findOne({ email: email }).exec();
@@ -51,13 +53,13 @@ exports.signup = async (req, res) => {
 
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = bcrypt.hashSync(password, salt);
-
+        
             let new_user = new User({
                 name: name,
                 email: email,
                 password: hashedPassword,
                 profilePicture: profilePicture || "",
-                address: address || "",
+                address: address || {},
                 role: "user"
             });
 
@@ -68,7 +70,6 @@ exports.signup = async (req, res) => {
                 name: savedUser.name,
                 email: savedUser.email,
                 role: savedUser.role,
-                token: token
             });
         }
     } catch (err) {
@@ -91,7 +92,6 @@ exports.login = async (req, res) => {
                         name: userExists.name,
                         email: userExists.email,
                         role: userExists.role,
-                        token: token
                     });
                 } else {
                     return response_400(res, "Wrong Password");
@@ -106,20 +106,18 @@ exports.login = async (req, res) => {
 };
 
 exports.logout = async (req, res) => {
-    try{
-        const {email, password} = req.body.user;
-        // console.log(email, password);
-        if(validate("something", email, password, res)){
-            const userExists = await User.findOne({ email: email}).exec();
-            if (userExists) {
-                res.clearCookie("token");
-                return response_200(res, "logged out successfully!", {});
-            }
-            return response_400(res, "didn't find this email");
+    try {
+        const token = req.cookies.token;
+
+        if (!token) {
+            return response_400(res, "No token found");
         }
 
+        res.clearCookie("token"); 
+
+        return response_200(res, "Logged out successfully!", {});
+    } catch (err) {
+        console.error("Logout error:", err);
+        return response_400(res, err.message);
     }
-    catch(err){
-        return response_400(res, err);
-    }
-}
+};
