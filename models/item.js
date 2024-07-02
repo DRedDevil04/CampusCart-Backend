@@ -20,7 +20,7 @@ const ItemSchema = new mongoose.Schema({
         currency:{type:String, default:"INR"},
         amount:{type:Number, required:true},
         discount:{
-            amount:{type:Number, default:0},
+            percentage:{type:Number, default:0},
             start:{type:Date},
             end:{type:Date},
         }

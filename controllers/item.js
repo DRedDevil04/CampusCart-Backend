@@ -10,9 +10,9 @@ const itemSchema = z.object({
         amount: z.number().nonnegative({ message: "Amount must be a non-negative number" }),
         currency: z.string().optional(),
         discount: z.object({
-            amount: z.number().nonnegative({ message: "Discount amount must be a non-negative number" }),
-            start: z.date().nullable().optional(),
-            end: z.date().nullable().optional(),
+            percentage: z.number().nonnegative({ message: "Discount amount must be a non-negative number" }).optional().nullable(),
+            start: z.date().nullable().optional().nullable(),
+            end: z.date().nullable().optional().nullable(),
         }).nullable().optional(),
     }),
     images: z.array(z.object({
@@ -46,9 +46,7 @@ const GetItem = async (req, res) => {
 
 const AddItem = async (req, res) => {
     try {
-        const validatedData = itemSchema.parse(req.body);
-
-        const { name, description, categoryID, price, images, available } = validatedData;
+        const { name, description, categoryID, price, images, available } = req.body;
         const item = new Item({ name, description, category: categoryID, price, images, available });
 
         const category = await Category.findById(categoryID);
@@ -76,7 +74,6 @@ const UpdateItem = async (req, res) => {
         if (!item) {
             return res.status(404).json({ message: 'Item to be updated not found!' });
         }
-        console.log(req.body);
         const { name, description, categoryID, price, images, available } = req.body;
         
         if (name) item.name = name;
@@ -111,8 +108,8 @@ const UpdateItem = async (req, res) => {
             }
             
             if (price.discount !== undefined) {
-                const { amount, start, end } = price.discount;
-                item.price.discount.amount = amount === '' ? null : amount;
+                const { percentage, start, end } = price.discount;
+                item.price.discount.percentage = percentage === '' ? null : percentage;
                 item.price.discount.start = start === '' ? null : start;
                 item.price.discount.end = end === '' ? null : end;
             }

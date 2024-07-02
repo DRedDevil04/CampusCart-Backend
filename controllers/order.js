@@ -4,18 +4,18 @@ const Item = require('../models/item');
 
 const addNewOrder = async (req, res) => {
     try {
-        const { items, payment, shipping } = req.body;
+        const { items, payment, shipping, user } = req.body;
 
-        const customer = req.body.user._id;
+        const customer = user._id;
         const customerExists = await User.findById(customer);
         if (!customerExists) {
             return res.status(400).json({ message: "Invalid customer ID" });
         }
 
-        for (let i = 0; i < items.length; i++) {
-            const itemExists = await Item.findById(items[i].item);
+        for (const item of items) {
+            const itemExists = await Item.findById(item.item);
             if (!itemExists) {
-                return res.status(400).json({ message: `Invalid item ID: ${items[i].item}` });
+                return res.status(400).json({ message: `Invalid item ID: ${item.item}` });
             }
         }
 
@@ -26,12 +26,12 @@ const addNewOrder = async (req, res) => {
             shipping,
         });
         customerExists.orders.push(newOrder._id);
-        const savedOrder = await newOrder.save();
+        await newOrder.save();
         await customerExists.save();
 
         return res.status(201).json({
             message: "Order Placed Successfully!",
-            savedOrder
+            savedOrder: newOrder
         });
     } catch (error) {
         console.error("Error adding new order:", error);
@@ -114,34 +114,21 @@ const editShippingDetails = async (req, res) => {
 
 const editShippingAddress = async (req, res) => {
     try {
-        const { room, floor, hostel, contact_number } = req.body;
+        const { room, floor, hostel, contact_number, user } = req.body;
 
         const order = await Order.findById(req.params.id);
-
-        const user = req.body.user;
-        if (order.customer._id.toString() !== user._id.toString()) {
-            return res.status(403).json({ message: "Unauthorized to view this order" });
-        }
-
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
 
-        if (room) {
-            order.shipping.address.room = room;
+        if (order.customer._id.toString() !== user._id.toString()) {
+            return res.status(403).json({ message: "Unauthorized to view this order" });
         }
 
-        if (floor) {
-            order.shipping.address.floor = floor;
-        }
-
-        if (hostel) {
-            order.shipping.address.hostel = hostel;
-        }
-
-        if (contact_number) {
-            order.shipping.address.contact_number = contact_number;
-        }
+        if (room) order.shipping.address.room = room;
+        if (floor) order.shipping.address.floor = floor;
+        if (hostel) order.shipping.address.hostel = hostel;
+        if (contact_number) order.shipping.address.contact_number = contact_number;
 
         const updatedOrder = await order.save();
 
@@ -185,10 +172,10 @@ const getAllOrders = async (req, res) => {
     try {
         const orders = await Order.find()
             .populate('customer', 'name email')
-            .populate('items.item', 'name price')
+            .populate('items.item', 'name price');
 
         return res.status(200).json({
-            message:"All Orders Details Fetched Successfully!",
+            message: "All Orders Details Fetched Successfully!",
             orders
         });
     } catch (error) {
@@ -197,24 +184,24 @@ const getAllOrders = async (req, res) => {
     }
 };
 
-const getParticularUserAllOrders = async (req,res)=>{
+const getParticularUserAllOrders = async (req, res) => {
     try {
-        const orders = await Order.find({customer:req.body.user._id})
+        const orders = await Order.find({ customer: req.body.user._id })
             .populate('items.item', 'name price');
 
-        if (!orders) {
+        if (orders.length === 0) {
             return res.status(404).json({ message: "No Orders Found!" });
         }
+
         return res.status(200).json({
-            message:"User Order Details Fetched Successfully!",
+            message: "User Order Details Fetched Successfully!",
             orders
         });
     } catch (error) {
-        console.error("Error Getting Orders",error);
-        return res.status(500).json({message:"Server Error!"});
+        console.error("Error getting orders", error);
+        return res.status(500).json({ message: "Server Error!" });
     }
-}
-
+};
 
 module.exports = {
     addNewOrder,
