@@ -2,12 +2,6 @@ const { z } = require("zod");
 const Category = require('../models/category');
 const Item = require("../models/item");
 
-const categorySchema = z.object({
-    name: z.string().min(1,"Name is required"),
-    description: z.string().min(1,"Description is required"),
-    icon: z.string().url().optional(),
-});
-
 
 const GetAllCategories = async (req, res) => {
   try {
@@ -32,8 +26,7 @@ const GetCategory = async (req, res) => {
 
 const AddCategory = async (req, res) => {
   try {
-    const validatedData = categorySchema.parse(req.body);
-    const { name, description, icon } = validatedData;
+    const { name, description, icon } = req.body;
     
     const category = new Category({ name, description, icon: icon || "" });
     await category.save();
@@ -49,8 +42,8 @@ const AddCategory = async (req, res) => {
 
 const UpdateCategory = async (req, res) => {
   try {
-    const validatedData = categorySchema.partial().parse(req.body);
-    const { name, description, icon } = validatedData;
+   
+    const { name, description, icon } = req.body;
     
     const category = await Category.findById(req.params.id);
     if (!category) {

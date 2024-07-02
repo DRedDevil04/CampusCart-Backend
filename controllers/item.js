@@ -2,27 +2,6 @@ const Item = require("../models/item");
 const Category = require("../models/category");
 const { z } = require("zod");
 
-const itemSchema = z.object({
-    name: z.string().min(1, { message: "Name is required" }),
-    description: z.string().min(1, { message: "Description is required" }),
-    categoryID: z.string().min(1, { message: "CategoryID is required" }),
-    price: z.object({
-        amount: z.number().nonnegative({ message: "Amount must be a non-negative number" }),
-        currency: z.string().optional(),
-        discount: z.object({
-            percentage: z.number().nonnegative({ message: "Discount amount must be a non-negative number" }).optional().nullable(),
-            start: z.date().nullable().optional().nullable(),
-            end: z.date().nullable().optional().nullable(),
-        }).nullable().optional(),
-    }),
-    images: z.array(z.object({
-        url: z.string().url({ message: "Invalid URL format" }),
-        altText: z.string().optional()
-    })).optional(),
-    available: z.boolean().optional(),
-});
-
-
 const GetAllItems = async (req, res) => {
     try {
         const items = await Item.find().populate('category');
