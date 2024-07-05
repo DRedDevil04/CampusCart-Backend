@@ -187,7 +187,8 @@ const getAllOrders = async (req, res) => {
 const getParticularUserAllOrders = async (req, res) => {
     try {
         const orders = await Order.find({ customer: req.body.user._id })
-            .populate('items.item', 'name price');
+    .populate('items.item', 'name price images')
+    .exec();
 
         if (orders.length === 0) {
             return res.status(404).json({ message: "No Orders Found!" });

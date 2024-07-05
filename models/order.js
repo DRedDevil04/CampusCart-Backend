@@ -31,8 +31,9 @@ const OrderSchema = new mongoose.Schema({
             default:"INR"
         },
         status:{
-            type:String,
-            default:"Confirmation Awaited"
+            type: String,
+            enum: ['Pending', 'Paid', 'Failed', 'Refunded', 'Cancelled'],
+            default: 'Pending'
         },
         transactionDate:{
             type:Date,
@@ -49,14 +50,11 @@ const OrderSchema = new mongoose.Schema({
         estimated_delivery_date:{
             type:String,
         },
-        shipping_status:{
-            type:String,
-            default:"Yet to Ship"
-        }
     },
     order_status:{
-        type:String,
-        default:"Order Confirmation Awaited"
+        type: String,
+        enum: ['Confirmation Awaited', 'Confirmed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'],
+        default: 'Confirmation Awaited'
     },
 });
 
