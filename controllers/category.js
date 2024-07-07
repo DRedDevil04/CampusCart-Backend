@@ -5,7 +5,7 @@ const Item = require("../models/item");
 
 const GetAllCategories = async (req, res) => {
   try {
-    const categories = await Category.find().populate("items");
+    const categories = await Category.find().populate("items").sort({ __created: -1 });
     return res.json(categories);
   } catch (err) {
     return res.status(500).json({ message: err.message });
@@ -14,7 +14,7 @@ const GetAllCategories = async (req, res) => {
 
 const GetCategory = async (req, res) => {
     try {
-      const category = await Category.findById(req.params.id).populate("items");
+      const category = await Category.findById(req.params.id).populate("items").sort({ __created: -1 });
       if (!category) {
         return res.status(404).json({ message: 'Category not found!' });
       }
@@ -44,8 +44,9 @@ const UpdateCategory = async (req, res) => {
   try {
    
     const { name, description, icon } = req.body;
-    
+    console.log(req.body);
     const category = await Category.findById(req.params.id);
+
     if (!category) {
       return res.status(404).json({ message: 'Category not found!' });
     }

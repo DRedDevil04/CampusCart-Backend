@@ -31,6 +31,7 @@ const addNewOrder = async (req, res) => {
 
         return res.status(201).json({
             message: "Order Placed Successfully!",
+            orderId:newOrder._id,
             savedOrder: newOrder
         });
     } catch (error) {
@@ -144,8 +145,8 @@ const editShippingAddress = async (req, res) => {
 
 const getOrderDetails = async (req, res) => {
     try {
-        const order = await Order.findById(req.params.id)
-            .populate('customer', 'name email')
+        const order = await Order.findById(req.params.id).sort({ __created: -1 })
+            .populate('customer', 'name email enrollment_number')
             .populate('items.item', 'name price');
 
         if (!order) {
@@ -170,8 +171,8 @@ const getOrderDetails = async (req, res) => {
 
 const getAllOrders = async (req, res) => {
     try {
-        const orders = await Order.find()
-            .populate('customer', 'name email')
+        const orders = await Order.find().sort({ __created: -1 })
+            .populate('customer', 'name email enrollment_number')
             .populate('items.item', 'name price');
 
         return res.status(200).json({
@@ -186,7 +187,7 @@ const getAllOrders = async (req, res) => {
 
 const getParticularUserAllOrders = async (req, res) => {
     try {
-        const orders = await Order.find({ customer: req.body.user._id })
+        const orders = await Order.find({ customer: req.body.user._id }).sort({ __created: -1 })
     .populate('items.item', 'name price images')
     .exec();
 

@@ -4,7 +4,7 @@ const {generateToken} = require("./authControllers")
 
 exports.updateProfile = async (req, res) => {
     try {
-        const { name, profilePicture, address, email } = req.body;
+        const { name, profilePicture,enrollment_number, address, email } = req.body;
         const { user } = req.body;
 
         const userExists = await User.findOne({ email: user.email }).exec();
@@ -21,6 +21,7 @@ exports.updateProfile = async (req, res) => {
 
         let updateObj = {};
         if (name) updateObj.name = name;
+        if (enrollment_number) updateObj.enrollment_number = enrollment_number;
         if (profilePicture) updateObj.profilePicture = profilePicture;
         if (address) updateObj.address = address;
         if (email) updateObj.email = email;
@@ -33,6 +34,7 @@ exports.updateProfile = async (req, res) => {
             name: updatedUser.name,
             email: updatedUser.email,
             address: updatedUser.address,
+            enrollment_number: updatedUser.enrollment_number,
             profilePicture: updatedUser.profilePicture,
         });
     } catch (err) {
@@ -66,6 +68,7 @@ exports.getProfile = async (req, res) => {
         return response_200(res, "get Profile", {
             name: userExists.name,
             email: userExists.email,
+            enrollment_number: userExists.enrollment_number,
             address: userExists.address,
             profilePicture: userExists.profilePicture,
             role: userExists.role,
@@ -107,7 +110,7 @@ exports.updateUserRole = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
     try {
-        const users = await User.find({}, 'name email role __created orders');
+        const users = await User.find({}, 'name email enrollment_number role __created orders');
 
         if (!users || users.length === 0) {
             return response_400(res, "No users found");

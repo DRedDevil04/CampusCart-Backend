@@ -4,10 +4,10 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const {response_400, response_200} = require('../utils/responseCodes.utils')
 
-function validate(name, email, password, res){
+function validate(name, email, password,enrollment_number, res){
     const emailSchema = zod.string().email();
     const passwordSchema = zod.string().min(8);
-    if(!name || !email || !password){
+    if(!name || !email || !password || !enrollment_number){
         response_400(res, "All Fields are required");
         return false;
     }
@@ -43,9 +43,9 @@ exports.generateToken = async function(res, user){
 
 exports.signup = async (req, res) => {
     try {
-        const { name, email, password,address, profilePicture } = req.body;
+        const { name, email, password,address, profilePicture, enrollment_number } = req.body;
 
-        if (validate(name, email, password, res)) {
+        if (validate(name, email, password,enrollment_number, res)) {
             const emailExists = await User.findOne({ email: email }).exec();
             if (emailExists) {
                 return response_400(res, "email is already in use");
@@ -57,6 +57,7 @@ exports.signup = async (req, res) => {
             let new_user = new User({
                 name: name,
                 email: email,
+                enrollment_number: enrollment_number,
                 password: hashedPassword,
                 profilePicture: profilePicture || "",
                 address: address || {},
@@ -69,6 +70,7 @@ exports.signup = async (req, res) => {
             return response_200(res, "registered successfully!", {
                 name: savedUser.name,
                 email: savedUser.email,
+                enrollment_number,
                 role: savedUser.role,
             });
         }
@@ -91,6 +93,7 @@ exports.login = async (req, res) => {
                     return response_200(res, "logged in successfully!", {
                         name: userExists.name,
                         email: userExists.email,
+                        enrollment_number: userExists.enrollment_number,
                         role: userExists.role,
                     });
                 } else {
