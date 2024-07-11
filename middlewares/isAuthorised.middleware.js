@@ -6,7 +6,9 @@ const {
 } = require("../utils/responseCodes.utils.js");
 
 async function isAuthorized(req, res, next) {
-    const authToken = req.cookies.token || req.token;
+    const authToken = req.body.token || req.headers.authorization;
+    console.log(req.headers);
+    console.log(authToken);
     if (!authToken) {
         return response_400(res, "No token provided");
     }
