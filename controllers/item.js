@@ -4,7 +4,7 @@ const { z } = require("zod");
 
 const GetAllItems = async (req, res) => {
     try {
-        const items = await Item.find().populate('category');
+        const items = await Item.find().populate('category').sort({ __created: -1 });
         res.status(201).json(items);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -13,7 +13,7 @@ const GetAllItems = async (req, res) => {
 
 const GetItem = async (req, res) => {
     try {
-        const item = await Item.findById(req.params.id).populate('category');
+        const item = await Item.findById(req.params.id).populate('category').sort({ __created: -1 });
         if (!item) {
             return res.status(404).json({ message: 'Item not found!' });
         }
