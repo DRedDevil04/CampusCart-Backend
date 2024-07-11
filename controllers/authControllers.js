@@ -70,6 +70,7 @@ exports.signup = async (req, res) => {
                 name: savedUser.name,
                 email: savedUser.email,
                 role: savedUser.role,
+                token: token
             });
         }
     } catch (err) {
@@ -92,6 +93,7 @@ exports.login = async (req, res) => {
                         name: userExists.name,
                         email: userExists.email,
                         role: userExists.role,
+                        token: token
                     });
                 } else {
                     return response_400(res, "Wrong Password");
