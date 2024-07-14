@@ -6,11 +6,14 @@ const {
 } = require("../utils/responseCodes.utils.js");
 
 async function isAuthorized(req, res, next) {
-    const authToken = req.body.token || req.headers.authorization;
-    console.log(req.headers);
-    console.log(authToken);
+    let authToken = req.body.token || req.headers.authorization;
+
     if (!authToken) {
         return response_400(res, "No token provided");
+    }
+
+    if (authToken.startsWith('Bearer ')) {
+        authToken = authToken.slice(7, authToken.length).trim();
     }
 
     try {

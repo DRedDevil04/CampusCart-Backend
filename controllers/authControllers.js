@@ -28,11 +28,11 @@ exports.generateToken = async function(res, user){
             expiresIn: "7d",
         });
 
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: true,   
-            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 
-        });
+        // res.cookie("token", token, {
+        //     httpOnly: true,
+        //     secure: true,   
+        //     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 
+        // });
 
         return token;
     } catch(err) {
@@ -106,23 +106,6 @@ exports.login = async (req, res) => {
             }
         }
     } catch (err) {
-        return response_400(res, err.message);
-    }
-};
-
-exports.logout = async (req, res) => {
-    try {
-        const token = req.cookies.token;
-
-        if (!token) {
-            return response_400(res, "No token found");
-        }
-
-        res.clearCookie("token"); 
-
-        return response_200(res, "Logged out successfully!", {});
-    } catch (err) {
-        console.error("Logout error:", err);
         return response_400(res, err.message);
     }
 };
