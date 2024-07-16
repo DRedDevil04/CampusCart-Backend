@@ -1,15 +1,11 @@
 const User = require("../models/user.models.js");
 const jwt = require("jsonwebtoken");
-const {
-    response_400,
-    response_500,
-} = require("../utils/responseCodes.utils.js");
 
 async function isAuthorized(req, res, next) {
     let authToken = req.body.token || req.headers.authorization;
 
     if (!authToken) {
-        return response_400(res, "No token provided");
+        return res.status(401).json({ message: "No token provided" });
     }
 
     if (authToken.startsWith('Bearer ')) {
@@ -22,13 +18,13 @@ async function isAuthorized(req, res, next) {
         const user = await User.findById(decoded._id);
 
         if (!user) {
-            return response_400(res, "User not found");
+            return res.status(401).json({ message: "User not found" });
         }
 
         req.body.user = user;
         next();
     } catch (err) {
-        return response_500(res, "Failed to authenticate user", err);
+        return res.status(401).json({ message: "Failed to authenticate user", error: err.message });
     }
 }
 
@@ -36,7 +32,7 @@ function isAdmin(req, res, next) {
     const user = req.body.user;
 
     if (user.role !== 'admin') {
-        return response_400(res, "Access denied. Admins only.");
+        return res.status(403).json({ message: "Access denied. Admins only." });
     }
 
     next();
