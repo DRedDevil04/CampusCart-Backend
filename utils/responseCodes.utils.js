@@ -1,4 +1,4 @@
-function response_400(res, message){
+function    response_400(res, message){
     return res.status(400).json({
         status:'error',
         error: message,
@@ -8,7 +8,7 @@ function response_400(res, message){
 
 function response_200(res, message, data) {
     return res.status(200).json({
-        status: 'Inserted',
+        status: 'Success',
         message,
         data
     });
