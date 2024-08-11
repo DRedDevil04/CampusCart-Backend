@@ -21,15 +21,16 @@ app.use(express.json());
 app.use(
   cors({
     // origin: "https://takeiteasy-iiita.vercel.app", //TODO: change it back
-    origin: "*",
+    origin: function (origin, callback) {
+      callback(null, origin || "*");
+    },
     methods: ["GET", "POST", "OPTIONS", "PUT"],
     allowedHeaders: [
       "Content-Type",
       "Authorization",
       "Access-Control-Allow-Origin",
     ],
-    // credentials: true,
-    credentials: false,
+    credentials: true, // Set credentials to true
   })
 );
 app.use(cookieParser());
