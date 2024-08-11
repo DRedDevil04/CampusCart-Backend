@@ -20,10 +20,14 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(
   cors({
-    // origin: 'https://takeiteasy-iiita.vercel.app', //TODO: change it back
-    origin: "http://localhost:5173/",
+    origin: "https://takeiteasy-iiita.vercel.app", //TODO: change it back
+    // origin: "http://localhost:5173/",
     methods: ["GET", "POST", "OPTIONS", "PUT"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "Access-Control-Allow-Origin",
+    ],
     credentials: true,
   })
 );
