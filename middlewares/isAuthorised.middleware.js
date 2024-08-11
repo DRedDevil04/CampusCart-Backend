@@ -13,8 +13,10 @@ async function isAuthorized(req, res, next) {
     }
 
     try {
+        // console.log(authToken);
+        // console.log(process.env.JWT_KEY);
         const decoded = jwt.verify(authToken, process.env.JWT_KEY);
-
+        // console.log(decoded);
         const user = await User.findById(decoded._id);
 
         if (!user) {

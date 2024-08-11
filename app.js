@@ -10,6 +10,7 @@ const CategoryRouter = require("./routes/category");
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const orderRoutes = require('./routes/order');
+const kitRoutes = require('./routes/kit.routes');
 
 const app = express();
 dotenv.config();
@@ -42,6 +43,7 @@ app.get("/",(req,res)=>{
 //Handling Items and Categories
 app.use("/item", ItemRouter);
 app.use("/category", CategoryRouter);
+app.use("/kits", kitRoutes);
 
 //Handling User
 app.use('/auth', authRoutes);
