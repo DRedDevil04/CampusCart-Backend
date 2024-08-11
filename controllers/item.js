@@ -1,11 +1,20 @@
 const Item = require("../models/item");
 const Category = require("../models/category");
 const { z } = require("zod");
+const { getCache, setCache } = require("../utils/cache");
 
 const GetAllItems = async (req, res) => {
     try {
-        const items = await Item.find().populate('category').sort({ __created: -1 });
-        res.status(201).json(items);
+        const cacheKey = "allitems";
+        const cachedData = await getCache(cacheKey);
+
+        if (cachedData) {
+            return res.status(200).json(JSON.parse(cachedData));
+        } else {
+            const items = await Item.find().populate('category').sort({ __created: -1 });
+            await setCache(cacheKey, JSON.stringify(items), 100); // Cache for 1 hour
+            return res.status(201).json(items);
+        }
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

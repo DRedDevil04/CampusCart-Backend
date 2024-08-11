@@ -1,23 +1,38 @@
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-// import { createClient } from "redis";
+const mongoose = require("mongoose");
+const { createClient } = require("redis");
+const dotenv = require("dotenv");
 
-// export const client = createClient({ url: process.env.CACHE_URI });
+dotenv.config({ path: "./.env" });
 
-// if (process.env.NODE_ENV === "production") {
-//   client.on("error", (err) => console.log("Redis Client Error", err));
-//   client.on("connect", () =>
-//     console.log("Connected to Redis Successfully! ✨")
-//   );
+const client = createClient({
+  url: process.env.REDIS_URI, // replace with your Redis server URL
+});
 
-//   await client.connect();
-// }
-dotenv.config({path:"./.env"});
+// Connect to Redis
+client
+  .connect()
+  .then(() => {
+    console.log("Connected to Redis");
+  })
+  .catch((err) => {
+    console.error("Redis connection error:", err);
+  });
+
+// Handling Redis errors
+client.on("error", (err) => {
+  console.error("Redis error:", err);
+});
+
 const db_url = process.env.MONGO_URI;
-console.log(db_url)
-export const connectDB = async () => {
+console.log(db_url);
+const connectDB = async () => {
   await mongoose.connect(db_url, {
     useUnifiedTopology: true,
   });
   console.log("\nConnected to Database Successfully! ✨");
+};
+
+module.exports = {
+  connectDB,
+  client,
 };

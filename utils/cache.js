@@ -1,15 +1,19 @@
-const client = require("./redis.config");
+const { client}= require("../config/db.config");
+async function getCache(key) {
+  if (process.env.NODE_ENV === "production") {
+    return await client.get(key);
+  }
+  return null;
+}
 
-export async function getCache(key) {
-    if (process.env.NODE_ENV === "production") {
-      return await client.get(key);
-    }
-    return null;
+async function setCache(key, value) {
+  if (process.env.NODE_ENV === "production") {
+    return await client.set(key, value, { EX: 100 });
   }
-  
-  export async function setCache(key, value) {
-    if (process.env.NODE_ENV === "production") {
-      return await client.set(key, value, { EX: CACHE_TTL });
-    }
-    return null;
-  }
+  return null;
+}
+
+module.exports = {
+  getCache,
+  setCache,
+};
