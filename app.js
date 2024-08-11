@@ -28,7 +28,8 @@ app.use(
       "Authorization",
       "Access-Control-Allow-Origin",
     ],
-    credentials: true,
+    // credentials: true,
+    credentials: false,
   })
 );
 app.use(cookieParser());
